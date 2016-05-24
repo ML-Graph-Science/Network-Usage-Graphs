@@ -120,13 +120,52 @@ def get_transfers_per_day(rows, printing):
         else:
             transfers_per_day[count] = [date]
 
-    transfers_per_day = collections.OrderedDict(sorted(transfers_per_day.items()))
+    transfers_per_day = collections.OrderedDict(sorted(transfers_per_day.items(),reverse=True))
 
     if printing is True:
         for count, dates in transfers_per_day.items():
             print("%d transfers/day on %d dates - %s" % (count, len(dates), ', '.join(map(str, dates))))
 
     return transfers_per_day
+
+
+# returns a list of the busiest dates
+def get_busiest_dates(rows, num_dates):
+    transfers_per_day = get_transfers_per_day(rows, False)
+
+    date_list = []
+    date_list_count = 0
+
+    for count, dates in transfers_per_day.items():
+        for date in dates:
+            date_list_count += 1
+            date_list.append(date)
+
+            if date_list_count >= num_dates:
+                return date_list
+
+    return date_list
+
+
+# returns a OrderedDict containing the transfer lists for the busiest dates
+def get_busiest_days(rows, num_dates, printing):
+
+    date_list = get_busiest_dates(rows, num_dates)
+
+    transfers_by_day = get_transfers_by_day(rows, False)
+
+    top_transfer_days = collections.OrderedDict()
+
+    for date in date_list:
+        top_transfer_days[date] = transfers_by_day[date]
+        # transfer_list.append(transfers_by_day[date])
+
+    if printing is True:
+        print("Daily Transfer Counts for Top {} Days".format(len(date_list)))
+        for date, transfer_list in top_transfer_days.items():
+            print("%s - %d transfers" % (date, len(transfer_list)))
+
+    return top_transfer_days
 
 
 # return the date which had the most transfer

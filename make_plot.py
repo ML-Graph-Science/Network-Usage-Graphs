@@ -44,74 +44,43 @@ def plot(jobs):
     plt.show()
 
 
-def make_histogram(filename, title, num_bins, transfers, yaxis):
+def make_bar_graph(filename, title, num_bins, transfers, yaxis):
 
     fig, ax = plt.subplots()
 
     # logScale = False
     # if yaxis == "log":
     #     logScale = True
-    #
-    # ax.hist(time_lengths, bins=bins, log=logScale)
 
     bins = bin_data(num_bins, transfers)
-
-    for cur_bin in bins:
-        print(cur_bin)
-
-    # ax.set_xscale(xaxis)
 
     plt.xlabel('Time of Day')
     plt.ylabel('Network Demand (Bytes)')
     plt.title(title)
 
-    # x = [t.hour * 3600 + t.minute * 60 + t.second for t in [cur_bin.start_t.time() for cur_bin in bins]]
-
-    seconds_per_hour = 60*60
     x = [cur_bin.start_t for cur_bin in bins]
     y = [cur_bin.bytes for cur_bin in bins]
 
-    width = 0.2
+    width = 0.8 / len(bins)
 
-    # plt.plot_date(x, y, fmt='bo', xdate=True)
+    plt.bar(x, y, width=width, color='r')
 
-    plt.bar(x, y, width=0.9/len(bins), color='r')
-
-    def timedelta(x, pos):
-        'The two args are the value and tick position'
-        hours, remainder = divmod(x, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        return ('%d:%02d:%02d' % (hours, minutes, seconds))
-
-    # ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(timedelta))
-
-    # ax.xaxis.set_major_locator(mpl.dates.HourLocator(interval=3))
-
-    xtick_interval = 3
-    ax.set_xticks([cur_bin.start_t for cur_bin in bins[0::xtick_interval]])
+    interval = 3
+    xtick_list = [(bins[0].start_t + datetime.timedelta(hours=i*interval)) for i in range(int(24/interval))]
+    ax.set_xticks(xtick_list)
 
     ax.xaxis.set_minor_locator(mpl.dates.HourLocator())
     ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%H:%M:%S'))
 
-    datemin = bins[0].start_t - datetime.timedelta(hours=1)
-    datemax = bins[-1].end_t + datetime.timedelta(hours=1)
-    ax.set_xlim(datemin, datemax)
+    date_min = bins[0].start_t - datetime.timedelta(hours=1)
+    date_max = bins[-1].end_t + datetime.timedelta(hours=1)
+    ax.set_xlim(date_min, date_max)
 
     fig.autofmt_xdate()
 
-    # ax.xaxis_date()
-
-    # if header is not None:
-    #     fn = header['file']
-    #     save_file_name = fn[(fn.rindex('/')+1):fn.rindex('.')] + ".png"
-    # else:
-    #     save_file_name = "all.png"
-    # save_file_name = os.path.join(plots_dir, save_file_name)
-
     print("\nSaving plot to %s" % filename)
 
-    # fig.subplots_adjust(left=0.2, bottom=0.25)
-    plt.savefig(filename, dpi=500)
+    plt.savefig(filename, dpi=250)
 
     plt.close(fig)
 
@@ -159,7 +128,6 @@ def bin_data(num_bins, transfers):
 def make_bins(num_bins, date):
     bins = []
     bin_size = 24.0 * 60 * 60 * 1000 * 1000 / num_bins
-    print(bin_size)
     for i in range(num_bins):
         microseconds = int(bin_size * i)
         start_t = date + datetime.timedelta(microseconds=microseconds)
@@ -169,7 +137,5 @@ def make_bins(num_bins, date):
 
         cur_bin = Bin(start_t, end_t)
         bins.append(cur_bin)
-
-    print(bins)
 
     return bins

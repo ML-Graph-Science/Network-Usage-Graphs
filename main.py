@@ -40,28 +40,22 @@ def main():
     # transfers_by_day = parse_logs.get_transfers_by_day(dict_transfers, True)
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
 
-    max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
+    top_transfer_days = parse_logs.get_busiest_days(dict_transfers, 50, True)
 
-    # count = 0
-    # for row in dict_transfers:
-    #     if row['complete_time'].date() != row['request_time'].date():
-    #         if row['request_time'].date() < max_date < row['complete_time'].date():
-    #             print("(Start: {}, ---, End: {})".format(row['request_time'], row['complete_time']))
-    #             print(row)
-    #             print()
-    #             count += 1
-    # print(count)
+    for date, transfers in top_transfer_days.items():
+        num_bins = 72
+        title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
+        plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
+        make_plot.make_bar_graph(plot_filename, title, num_bins, transfers, yaxis="linear")
 
-    transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
+    # max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
+    # transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
+    # make_plot.make_bar_graph(plot_filename,title, num_bins, transfers, yaxis="linear")
 
-    num_bins = 24
-    title = "Network Usage on {}".format(max_date)
-    plot_filename = "plots/orig_network_demand_{}_{}bins.png".format(max_date, num_bins)
+    # num_bins = 24
+    # title = "Network Usage on {}".format(max_date)
+    # plot_filename = "plots/orig_network_demand_{}_{}bins.png".format(max_date, num_bins)
 
-    make_plot.make_histogram(plot_filename,title, num_bins, transfers, yaxis="linear")
-
-    print(title)
-    print(plot_filename)
 
 
 if __name__ == "__main__":
