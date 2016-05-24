@@ -1,0 +1,23 @@
+request_time, complete_time, src_logical_name, dst_logical_name, st_files, st_faults, elapsed, src_name, dst_name, bytes, rate, src_lat, src_lon, src_city, dst_lat, dst_lon, dst_city, distance
+01:25.6,01:28.3,kdeng#kaideng,nersc#dtn,1,0,2.711924,50.136.249.149,dtn01.nersc.gov,247320,91197.245,37.948,-122.061,Pleasant Hill,37.8668,-122.254,Berkeley,19.17430529
+39:04.7,41:33.6,nersc#edison,khkim#Desktop,102,0,148.84778,edisongrid.nersc.gov,143.248.6.215,46395924,311700.476,37.8668,-122.254,Berkeley,37.57,126.98,NULL,9032.701742
+54:58.9,02:48.2,nersc#hpss,lcrc#fusion,1,0,469.296005,garchive.nersc.gov,gridftp2.lcrc.anl.gov,33388759040,71146480.44,37.8668,-122.254,Berkeley,41.6303,-87.8539,Orland Park,2950.710277
+46:28.1,52:52.4,jgi#portal,vut1#PSU.Box (Deleted 2015-09-06 12:33:46),5,0,384.30408,dtn04.nersc.gov,98.235.167.18,316588481,823796.825,37.8668,-122.254,Berkeley,40.7975,-77.9021,State College,3787.797447
+23:21.0,23:24.2,nersc#carver,kap146#2011,2,0,3.233001,carvergrid.nersc.gov,50.156.101.141,141386,43732.123,37.8668,-122.254,Berkeley,37.323,-122.032,Cupertino,63.53573514
+38:47.3,10:02.6,jgi#portal,jeremycox#clusterdrive,35,59,340275.2786,dtn04.nersc.gov,205.142.197.33,7194031321,21141.798,37.8668,-122.254,Berkeley,39.154,-84.4873,Cincinnati,3265.32512
+25:09.8,28:10.8,jgi#portal,cjnankai#genome,1,0,181.012892,dtn04.nersc.gov,130.238.154.45,317456384,1753777.758,37.8668,-122.254,Berkeley,59.85,17.6333,Uppsala,8545.038487
+16:49.5,31:58.8,jgi#portal,umich#flux,2,0,4509.330753,dtn04.nersc.gov,flux-xfer.arc-ts.umich.edu,13326201237,2955250.339,37.8668,-122.254,Berkeley,42.3241,-83.7113,Ann Arbor,3287.149939
+37:48.0,54:12.2,lux#gsk-60,nersc#pdsf,9847,0,984.182661,138.16.225.20,pdsfdtn2.nersc.gov,29356638482,29828445.11,41.8267,-71.3977,Providence,37.8668,-122.254,Berkeley,4300.454944
+01:33.8,05:04.6,nersc#dtn,tbechtel#home,7,0,210.786835,dtn01.nersc.gov,71.211.148.253,133326626,632518.752,37.8668,-122.254,Berkeley,39.9285,-104.956,Denver,1511.924792
+34:01.3,14:11.6,nersc#dtn,bpb#mac-laptop-bowen-2012,31152,30,6010.261018,dtn01.nersc.gov,128.3.89.188,1056499477,175782.628,37.8668,-122.254,Berkeley,37.7772,-121.955,Concord,28.023471
+46:17.3,04:37.9,lux#gsk-60,nersc#pdsf,1801,0,1100.591953,138.16.225.20,pdsfdtn2.nersc.gov,47956351114,43573234.37,41.8267,-71.3977,Providence,37.8668,-122.254,Berkeley,4300.454944
+47:08.7,50:05.6,jgi#portal,zpob#zpob1,21,0,10976.86145,dtn04.nersc.gov,147.231.44.13,454310153,41387.982,37.8668,-122.254,Berkeley,50.0833,14.4667,Prague,9356.523464
+47:45.9,53:55.8,hoffman2#dtn1.hoffman2.idre.ucla.edu,nersc#dtn,1178,0,369.82816,dtn1.hoffman2.idre.ucla.edu,dtn01.nersc.gov,58026726179,156901860,33.7866,-118.299,Los Angeles,37.8668,-122.254,Berkeley,576.9053346
+31:54.6,18:00.9,nersc#dtn,soups9pi#linux_pc04_5132jo,2,0,45966.30686,dtn01.nersc.gov,152.1.40.212,3.83711E+11,8347652.261,37.8668,-122.254,Berkeley,35.7463,-78.7239,Raleigh,3847.429857
+43:22.7,43:25.2,afchadwi#sirius,nersc#edison,1,0,2.529765,141.212.131.183,edisongrid.nersc.gov,3767,1489.071,42.2923,-83.7145,Ann Arbor,37.8668,-122.254,Berkeley,3287.162457
+52:12.2,52:15.0,nersc#hopper,nersc#edison,1,0,2.769965,hoppergrid.nersc.gov,edisongrid.nersc.gov,69,24.91,37.8668,-122.254,Berkeley,37.8668,-122.254,Berkeley,9.49353E-05
+46:00.4,50:12.3,nersc#hpss,nersc#hopper,1,0,251.927545,garchive.nersc.gov,hoppergrid.nersc.gov,7127933952,28293587.16,37.8668,-122.254,Berkeley,37.8668,-122.254,Berkeley,9.49353E-05
+17:15.6,19:51.2,ncsa#BlueWaters,nersc#dtn,2262,0,155.60187,ie01.ncsa.illinois.edu,dtn01.nersc.gov,60905091936,391416195.3,40.1106,-88.2073,Urbana,37.8668,-122.254,Berkeley,2935.154714
+58:08.5,09:16.3,qingyang#STUDENT3,nersc#edison,4,0,667.781579,131.243.191.154,edisongrid.nersc.gov,24464831968,36635979.09,37.8646,-122.288,Berkeley,37.8668,-122.254,Berkeley,3.002984925
+50:45.6,31:36.1,lux#gsk-60,nersc#pdsf,5613,0,2450.494535,138.16.225.20,pdsfdtn2.nersc.gov,52128533824,21272658.67,41.8267,-71.3977,Providence,37.8668,-122.254,Berkeley,4300.454944
+30:31.9,32:12.8,sdss#admin,nersc#dtn,7548,0,100.864235,sdss-dtn02.chpc.utah.edu,dtn01.nersc.gov,3865,38.318,40.7855,-111.737,Salt Lake City,37.8668,-122.254,Berkeley,960.3082879
