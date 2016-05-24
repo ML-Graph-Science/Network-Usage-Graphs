@@ -98,21 +98,6 @@ def get_transfers_by_day(rows, printing):
 
             current_day = current_day + datetime.timedelta(days=1)
 
-        # if row['complete_time'].date() != row['request_time'].date():
-        #     tmp_date = row['request_time'].date()
-        #     while tmp_date < row['complete_time'].date():
-        #         if current_day in transfers_by_day:
-        #             transfers_by_day[current_day].append(row)
-        #         else:
-        #             transfers_by_day[current_day] = [row]
-        #
-        #
-        #     current_day = row['complete_time'].date()
-        #     if current_day in transfers_by_day:
-        #         transfers_by_day[current_day].append(row)
-        #     else:
-        #         transfers_by_day[current_day] = [row]
-
     list_of_days = collections.OrderedDict(sorted(transfers_by_day.items()))
 
     if printing is True:

@@ -1,11 +1,8 @@
 import sys
 from os.path import isfile
-import collections
-import datetime
 
 import parse_logs
 import make_plot
-# import plot
 
 def main():
     '''Main function'''
@@ -45,16 +42,15 @@ def main():
 
     max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
 
-    count = 0
-    for row in dict_transfers:
-        if row['complete_time'].date() != row['request_time'].date():
-            if row['request_time'].date() < max_date < row['complete_time'].date():
-                print("(Start: {}, ---, End: {})".format(row['request_time'], row['complete_time']))
-                print(row)
-                print()
-                count += 1
-    print(count)
-
+    # count = 0
+    # for row in dict_transfers:
+    #     if row['complete_time'].date() != row['request_time'].date():
+    #         if row['request_time'].date() < max_date < row['complete_time'].date():
+    #             print("(Start: {}, ---, End: {})".format(row['request_time'], row['complete_time']))
+    #             print(row)
+    #             print()
+    #             count += 1
+    # print(count)
 
     transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
 
@@ -64,12 +60,8 @@ def main():
 
     make_plot.make_histogram(plot_filename,title, num_bins, transfers, yaxis="linear")
 
-
     print(title)
     print(plot_filename)
-
-
-
 
 
 if __name__ == "__main__":

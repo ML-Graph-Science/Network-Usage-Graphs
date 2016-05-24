@@ -97,25 +97,12 @@ class Bin(object):
     def intersect(self, transfer):
         tran_start = transfer['request_time']
         tran_end = transfer['complete_time']
-        # tran_end = tran_start + datetime.timedelta(seconds=transfer['elapsed'])
 
         if (self.start_t <= tran_start <= self.end_t) or (self.start_t <= tran_end <= self.end_t)\
                 or (tran_start <= self.start_t and self.end_t <= tran_end):
-            # print(transfer)
-            # print('    intersects with bin: {}'.format(self))
-            # start = max(self.start_t, tran_start)
-            # end = min(self.end_t, tran_end)
-            # print('----(start time: {}, end time: {})'.format(start, end))
-            # print(intersect_time)
-
             return True
 
         return False
-
-        # if (tran_start >= self.start_t and tran_start <= self.end_t) \
-        #         or tran_end <= self.end_t:
-        #     print(transfer)
-        #     print('    intersects with bin: {}'.format(self))
 
     def __repr__(self):
         return "(start_t: {}, end_t: {}, bytes: {})".format(self.start_t, self.end_t, self.bytes)
@@ -130,65 +117,17 @@ def bin_data(num_bins, transfers):
 
     for cur_bin in bins:
         for transfer in transfers:
-            # time = transfer['request_time']
-            # bytes = transfer['bytes']
-            # transfer_time = transfer['elapsed']
-            # rate = transfer['rate']
 
             if cur_bin.intersect(transfer) is True:
-                # print(transfer)
-                # tran_start = transfer['request_time']
-                # tran_end = transfer['complete_time']
                 start = max(cur_bin.start_t, transfer['request_time'])
                 end = min(cur_bin.end_t, transfer['complete_time'])
                 intersect_time = (end - start).total_seconds()
-
-                intersect_bytes = round(intersect_time * transfer['rate'])
-
-                print("Transfer: (start - {}), (end - {})".format(transfer['request_time'], transfer['complete_time']))
-                print('    intersects with bin: {} ----(start time: {}, end time: {}) --- bytes: {}'.format(cur_bin, start, end, intersect_bytes))
-                print('        seconds: {} --- rate: {} --- bytes: {}'.format(intersect_time, transfer['rate'], intersect_bytes))
-
                 cur_bin.bytes += intersect_time * transfer['rate']
 
-                # print('----(start time: {}, end time: {})'.format(start, end))
-
-
-    # for transfer in transfers:
-    #     time = transfer['request_time']
-    #     bytes = transfer['bytes']
-    #     transfer_time = transfer['elapsed']
-    #     rate = transfer['rate']
-    #     while bytes > 0:
-    #         get_bin(bins, time)
-
-
-# def make_bins(num_bins, date):
-#     bins = []
-#     bin_size = 24.0 * 60 * 60 / num_bins
-#     print(bin_size)
-#     for i in range(num_bins):
-#         seconds = int(bin_size * i)
-#         m, s = divmod(seconds, 60)
-#         h, m = divmod(m, 60)
-#         d, h = divmod(h, 24)
-#         start_t = date + datetime.timedelta(hours=h, minutes=m, seconds=s)
-#         # start_t = datetime.time(h, m, s)
-#         seconds = int(bin_size * (i+1)) - 1
-#         m, s = divmod(seconds, 60)
-#         h, m = divmod(m, 60)
-#         d, h = divmod(h, 24)
-#         end_t = date + datetime.timedelta(hours=h, minutes=m, seconds=s)
-#         # end_t = datetime.time(h, m, s)
-#         # bin = {'start_time': start_t, 'end_time': end_t, 'bytes': 0}
-#         # bins.append((start_t, end_t, 0))
-#
-#         cur_bin = Bin(start_t, end_t)
-#         bins.append(cur_bin)
-#
-#     print(bins)
-#
-#     return bins
+                # intersect_bytes = round(intersect_time * transfer['rate'])
+                # print("Transfer: (start - {}), (end - {})".format(transfer['request_time'], transfer['complete_time']))
+                # print('    intersects with bin: {} ----(start time: {}, end time: {}) --- bytes: {}'.format(cur_bin, start, end, intersect_bytes))
+                # print('        seconds: {} --- rate: {} --- bytes: {}'.format(intersect_time, transfer['rate'], intersect_bytes))
 
 
 def make_bins(num_bins, date):
