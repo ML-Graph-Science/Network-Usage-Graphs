@@ -56,12 +56,26 @@ def make_histogram(filename, title, num_bins, transfers, yaxis):
 
     bins = bin_data(num_bins, transfers)
 
-    ax.set_xscale(xaxis)
+    for cur_bin in bins:
+        print(cur_bin)
+
+    # ax.set_xscale(xaxis)
 
     plt.xlabel('Time of Day')
     plt.ylabel('Network Demand (Bytes)')
-
     plt.title(title)
+
+    # x = [t.hour * 3600 + t.minute * 60 + t.second for t in [cur_bin.start_t.time() for cur_bin in bins]]
+
+    seconds_per_hour = 60*60
+    x = [cur_bin.start_t for cur_bin in bins]
+    y = [cur_bin.bytes for cur_bin in bins]
+
+    width = 0.2
+
+    # plt.plot_date(x, y, fmt='bo', xdate=True)
+
+    plt.bar(x, y, width=0.9/len(bins), color='r')
 
     def timedelta(x, pos):
         'The two args are the value and tick position'
@@ -69,9 +83,23 @@ def make_histogram(filename, title, num_bins, transfers, yaxis):
         minutes, seconds = divmod(remainder, 60)
         return ('%d:%02d:%02d' % (hours, minutes, seconds))
 
-    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(timedelta))
+    # ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(timedelta))
+
+    # ax.xaxis.set_major_locator(mpl.dates.HourLocator(interval=3))
+
+    xtick_interval = 3
+    ax.set_xticks([cur_bin.start_t for cur_bin in bins[0::xtick_interval]])
+
+    ax.xaxis.set_minor_locator(mpl.dates.HourLocator())
+    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%H:%M:%S'))
+
+    datemin = bins[0].start_t - datetime.timedelta(hours=1)
+    datemax = bins[-1].end_t + datetime.timedelta(hours=1)
+    ax.set_xlim(datemin, datemax)
 
     fig.autofmt_xdate()
+
+    # ax.xaxis_date()
 
     # if header is not None:
     #     fn = header['file']
@@ -82,7 +110,7 @@ def make_histogram(filename, title, num_bins, transfers, yaxis):
 
     print("\nSaving plot to %s" % filename)
 
-    fig.subplots_adjust(left=0.2, bottom=0.25)
+    # fig.subplots_adjust(left=0.2, bottom=0.25)
     plt.savefig(filename, dpi=500)
 
     plt.close(fig)
@@ -113,6 +141,7 @@ def bin_data(num_bins, transfers):
 
     date = transfers[0]['request_time'].date()
     date = datetime.datetime(date.year, date.month, date.day)
+
     bins = make_bins(num_bins, date)
 
     for cur_bin in bins:
@@ -122,12 +151,9 @@ def bin_data(num_bins, transfers):
                 start = max(cur_bin.start_t, transfer['request_time'])
                 end = min(cur_bin.end_t, transfer['complete_time'])
                 intersect_time = (end - start).total_seconds()
-                cur_bin.bytes += intersect_time * transfer['rate']
+                cur_bin.bytes += round(intersect_time * transfer['rate'])
 
-                # intersect_bytes = round(intersect_time * transfer['rate'])
-                # print("Transfer: (start - {}), (end - {})".format(transfer['request_time'], transfer['complete_time']))
-                # print('    intersects with bin: {} ----(start time: {}, end time: {}) --- bytes: {}'.format(cur_bin, start, end, intersect_bytes))
-                # print('        seconds: {} --- rate: {} --- bytes: {}'.format(intersect_time, transfer['rate'], intersect_bytes))
+    return bins
 
 
 def make_bins(num_bins, date):

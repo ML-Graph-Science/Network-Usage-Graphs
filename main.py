@@ -56,7 +56,7 @@ def main():
 
     num_bins = 24
     title = "Network Usage on {}".format(max_date)
-    plot_filename = "plots/orig_network_demand_{}_{}bins".format(max_date, num_bins)
+    plot_filename = "plots/orig_network_demand_{}_{}bins.png".format(max_date, num_bins)
 
     make_plot.make_histogram(plot_filename,title, num_bins, transfers, yaxis="linear")
 
