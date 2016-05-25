@@ -40,7 +40,7 @@ def main():
     # transfers_by_day = parse_logs.get_transfers_by_day(dict_transfers, True)
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
 
-    num_days_to_graph = 10
+    num_days_to_graph = 1
 
     top_transfer_days = parse_logs.get_busiest_days(dict_transfers, num_days_to_graph, True)
 

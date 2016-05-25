@@ -131,16 +131,67 @@ def bin_data(num_bins, transfers):
 
     bins = make_bins(num_bins, date)
 
-    for cur_bin in bins:
-        for transfer in transfers:
+    for transfer in transfers:
+        start_time = max(bins[0].start_t, transfer['request_time'])
+        end_time = min(bins[-1].end_t, transfer['complete_time'])
 
-            if cur_bin.intersect(transfer) is True:
-                start = max(cur_bin.start_t, transfer['request_time'])
-                end = min(cur_bin.end_t, transfer['complete_time'])
-                intersect_time = (end - start).total_seconds()
-                cur_bin.bytes += round(intersect_time * transfer['rate'])
+        cur_bin_idx, cur_bin = find_bin(bins, start_time)
+
+        # print("\nTransfer:")
+        # print(transfer)
+        # print("Intersects with:")
+        # bin_count = 0
+
+        while bins[cur_bin_idx].start_t < end_time:
+
+            intersect_start = max(cur_bin.start_t, start_time)
+            intersect_end = min(cur_bin.end_t, end_time)
+
+            intersect_time = (intersect_end - intersect_start).total_seconds()
+            cur_bin.bytes += round(intersect_time * transfer['rate'])
+
+            # if (bin_count % (60 * 60)) == 0:
+            #     print('    Bin: {} - s: {}, e: {}, bytes: {}'.format(cur_bin_idx, intersect_start, intersect_end,
+            #                                                          round(intersect_time * transfer['rate'])))
+            # bin_count += 1
+
+            cur_bin_idx += 1
+            if cur_bin_idx >= len(bins):
+                break
+            cur_bin = bins[cur_bin_idx]
+
+        # print('    Bin: {} - s: {}, e: {}, bytes: {}'.format(cur_bin_idx, intersect_start, intersect_end,
+        #                                                      round(intersect_time * transfer['rate'])))
 
     return bins
+
+
+def find_bin(bins, cur_time):
+
+    for idx, cur_bin in enumerate(bins):
+        if cur_bin.start_t <= cur_time <= cur_bin.end_t:
+            return idx, cur_bin
+    return -1, None
+
+
+# # distribute the transfers into the appropriate amount of bins
+# def bin_data(num_bins, transfers):
+#
+#     date = transfers[0]['request_time'].date()
+#     date = datetime.datetime(date.year, date.month, date.day)
+#
+#     bins = make_bins(num_bins, date)
+#
+#     for cur_bin in bins:
+#         for transfer in transfers:
+#
+#             if cur_bin.intersect(transfer) is True:
+#                 start = max(cur_bin.start_t, transfer['request_time'])
+#                 end = min(cur_bin.end_t, transfer['complete_time'])
+#                 intersect_time = (end - start).total_seconds()
+#                 cur_bin.bytes += round(intersect_time * transfer['rate'])
+#
+#     return bins
 
 
 def make_bins(num_bins, date):
