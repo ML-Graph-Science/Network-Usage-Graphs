@@ -55,15 +55,21 @@ def make_bar_graph(filename, title, num_bins, transfers, yaxis):
     bins = bin_data(num_bins, transfers)
 
     plt.xlabel('Time of Day')
-    plt.ylabel('Network Demand (Bytes)')
+    plt.ylabel('Network Demand (MiB/S)')
     plt.title(title)
+
+    bytes_in_megabyte = 1024*1024
 
     x = [cur_bin.start_t for cur_bin in bins]
     y = [cur_bin.bytes for cur_bin in bins]
 
+    # convert bytes to megabytes
+    y = [float(val)/bytes_in_megabyte for val in y]
+
     width = 0.8 / len(bins)
 
-    plt.bar(x, y, width=width, color='r')
+    plt.plot(x, y, color='cornflowerblue', linestyle='-', linewidth=1)
+    # plt.bar(x, y, width=width, color='r')
 
     interval = 3
     xtick_list = [(bins[0].start_t + datetime.timedelta(hours=i*interval)) for i in range(int(24/interval))]
@@ -80,9 +86,21 @@ def make_bar_graph(filename, title, num_bins, transfers, yaxis):
 
     print("\nSaving plot to %s" % filename)
 
+    verify_filename(filename)
+
     plt.savefig(filename, dpi=250)
 
     plt.close(fig)
+
+
+# make sure the plot filename is valid (i.e. all of the parent directories exist)
+def verify_filename(filename):
+    for idx, cur_char in enumerate(filename):
+        if cur_char is '/':
+            cur_dir_path = filename[:idx]
+
+            if not os.path.exists(cur_dir_path):
+                os.makedirs(cur_dir_path)
 
 
 class Bin(object):
