@@ -42,16 +42,21 @@ def main():
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
 
     num_days_to_graph = 10
+    num_bins = 86400
 
     top_transfer_days = parse_logs.get_busiest_days(dict_transfers, num_days_to_graph, True)
 
     for date, transfers in top_transfer_days.items():
-        num_bins = 86400
-        bins = modify_logs.bin_data(num_bins, transfers, date)
+        plot_original_data(transfers, date, num_bins)
 
-        title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
-        plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
-        make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
+        plot_modified_data(transfers, date, num_bins)
+
+
+        # bins = modify_logs.bin_data(None, num_bins, transfers, date)
+        #
+        # title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
+        # plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
+        # make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
 
     # max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
     # transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
@@ -61,6 +66,21 @@ def main():
     # title = "Network Usage on {}".format(max_date)
     # plot_filename = "plots/orig_network_demand_{}_{}bins.png".format(max_date, num_bins)
 
+
+def plot_original_data(transfers, date, num_bins):
+    bins = modify_logs.bin_data(None, num_bins, transfers, date)
+
+    title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
+    plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
+    make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
+
+
+def plot_modified_data(transfers, date, num_bins):
+    bins = modify_logs.split_logs_and_modify_transfers(num_bins, transfers, date, 0.1, 0.6, 0.5)
+
+    title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
+    plot_filename = "plots/mod_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
+    make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
 
 
 if __name__ == "__main__":

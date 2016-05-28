@@ -73,7 +73,8 @@ def make_line_plot(filename, title, bins, yaxis):
     ax.set_xticks(xtick_list)
 
     ax.xaxis.set_minor_locator(mpl.dates.HourLocator())
-    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%H:%M:%S'))
+    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%H:%M'))
+    # ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%H:%M:%S'))
 
     date_min = bins[0].start_t - datetime.timedelta(hours=1)
     date_max = bins[-1].end_t + datetime.timedelta(hours=1)

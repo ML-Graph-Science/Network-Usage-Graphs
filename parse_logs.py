@@ -2,6 +2,8 @@ import csv
 import collections
 import datetime
 
+from copy import deepcopy
+
 
 columnHeaders = ['request_time', 'complete_time', 'src_logical_name', 'dst_logical_name', 'st_files',
                  'st_faults', 'elapsed', 'src_name', 'dst_name', 'bytes',
@@ -33,7 +35,7 @@ def parse_csv(file_name, printer):
                 'row[3]',
                 'int(row[4])',
                 'int(row[5])',
-                'float(row[6])',
+                'datetime.timedelta(seconds=float(row[6]))',
                 'row[7]',
                 'row[8]',
                 'int(row[9])',
@@ -84,17 +86,17 @@ def get_transfers_by_day(rows, printing):
     for row in rows:
         current_day = row['request_time'].date()
         if current_day in transfers_by_day:
-            transfers_by_day[current_day].append(row)
+            transfers_by_day[current_day].append(deepcopy(row))
         else:
-            transfers_by_day[current_day] = [row]
+            transfers_by_day[current_day] = [deepcopy(row)]
 
         current_day = current_day + datetime.timedelta(days=1)
 
         while current_day <= row['complete_time'].date():
             if current_day in transfers_by_day:
-                transfers_by_day[current_day].append(row)
+                transfers_by_day[current_day].append(deepcopy(row))
             else:
-                transfers_by_day[current_day] = [row]
+                transfers_by_day[current_day] = [deepcopy(row)]
 
             current_day = current_day + datetime.timedelta(days=1)
 
