@@ -1,7 +1,6 @@
 import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 
 plots_parent_dir = "plots/"
@@ -44,15 +43,13 @@ def plot(jobs):
     plt.show()
 
 
-def make_bar_graph(filename, title, num_bins, transfers, yaxis):
+def make_line_plot(filename, title, bins, yaxis):
 
     fig, ax = plt.subplots()
 
     # logScale = False
     # if yaxis == "log":
     #     logScale = True
-
-    bins = bin_data(num_bins, transfers)
 
     plt.xlabel('Time of Day')
     plt.ylabel('Network Demand (MiB/S)')
@@ -102,109 +99,3 @@ def verify_filename(filename):
             if not os.path.exists(cur_dir_path):
                 os.makedirs(cur_dir_path)
 
-
-class Bin(object):
-    def __init__(self, start_t, end_t):
-        self.start_t = start_t
-        self.end_t = end_t
-        self.bytes = 0
-
-    def intersect(self, transfer):
-        tran_start = transfer['request_time']
-        tran_end = transfer['complete_time']
-
-        if (self.start_t <= tran_start <= self.end_t) or (self.start_t <= tran_end <= self.end_t)\
-                or (tran_start <= self.start_t and self.end_t <= tran_end):
-            return True
-
-        return False
-
-    def __repr__(self):
-        return "(start_t: {}, end_t: {}, bytes: {})".format(self.start_t, self.end_t, self.bytes)
-
-
-# distribute the transfers into the appropriate amount of bins
-def bin_data(num_bins, transfers):
-
-    date = transfers[0]['request_time'].date()
-    date = datetime.datetime(date.year, date.month, date.day)
-
-    bins = make_bins(num_bins, date)
-
-    for transfer in transfers:
-        start_time = max(bins[0].start_t, transfer['request_time'])
-        end_time = min(bins[-1].end_t, transfer['complete_time'])
-
-        cur_bin_idx, cur_bin = find_bin(bins, start_time)
-
-        # print("\nTransfer:")
-        # print(transfer)
-        # print("Intersects with:")
-        # bin_count = 0
-
-        while bins[cur_bin_idx].start_t < end_time:
-
-            intersect_start = max(cur_bin.start_t, start_time)
-            intersect_end = min(cur_bin.end_t, end_time)
-
-            intersect_time = (intersect_end - intersect_start).total_seconds()
-            cur_bin.bytes += round(intersect_time * transfer['rate'])
-
-            # if (bin_count % (60 * 60)) == 0:
-            #     print('    Bin: {} - s: {}, e: {}, bytes: {}'.format(cur_bin_idx, intersect_start, intersect_end,
-            #                                                          round(intersect_time * transfer['rate'])))
-            # bin_count += 1
-
-            cur_bin_idx += 1
-            if cur_bin_idx >= len(bins):
-                break
-            cur_bin = bins[cur_bin_idx]
-
-        # print('    Bin: {} - s: {}, e: {}, bytes: {}'.format(cur_bin_idx, intersect_start, intersect_end,
-        #                                                      round(intersect_time * transfer['rate'])))
-
-    return bins
-
-
-def find_bin(bins, cur_time):
-
-    for idx, cur_bin in enumerate(bins):
-        if cur_bin.start_t <= cur_time <= cur_bin.end_t:
-            return idx, cur_bin
-    return -1, None
-
-
-# # distribute the transfers into the appropriate amount of bins
-# def bin_data(num_bins, transfers):
-#
-#     date = transfers[0]['request_time'].date()
-#     date = datetime.datetime(date.year, date.month, date.day)
-#
-#     bins = make_bins(num_bins, date)
-#
-#     for cur_bin in bins:
-#         for transfer in transfers:
-#
-#             if cur_bin.intersect(transfer) is True:
-#                 start = max(cur_bin.start_t, transfer['request_time'])
-#                 end = min(cur_bin.end_t, transfer['complete_time'])
-#                 intersect_time = (end - start).total_seconds()
-#                 cur_bin.bytes += round(intersect_time * transfer['rate'])
-#
-#     return bins
-
-
-def make_bins(num_bins, date):
-    bins = []
-    bin_size = 24.0 * 60 * 60 * 1000 * 1000 / num_bins
-    for i in range(num_bins):
-        microseconds = int(bin_size * i)
-        start_t = date + datetime.timedelta(microseconds=microseconds)
-
-        microseconds = int(bin_size * (i+1)) - 1
-        end_t = date + datetime.timedelta(microseconds=microseconds)
-
-        cur_bin = Bin(start_t, end_t)
-        bins.append(cur_bin)
-
-    return bins

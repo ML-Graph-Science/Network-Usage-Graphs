@@ -3,6 +3,7 @@ from os.path import isfile
 
 import parse_logs
 import make_plot
+import modify_logs
 
 def main():
     '''Main function'''
@@ -40,15 +41,17 @@ def main():
     # transfers_by_day = parse_logs.get_transfers_by_day(dict_transfers, True)
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
 
-    num_days_to_graph = 1
+    num_days_to_graph = 10
 
     top_transfer_days = parse_logs.get_busiest_days(dict_transfers, num_days_to_graph, True)
 
     for date, transfers in top_transfer_days.items():
         num_bins = 86400
+        bins = modify_logs.bin_data(num_bins, transfers, date)
+
         title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
         plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
-        make_plot.make_bar_graph(plot_filename, title, num_bins, transfers, yaxis="linear")
+        make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
 
     # max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
     # transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
