@@ -56,7 +56,7 @@ def parse_csv(file_name, printer):
                         row[idx] = eval(column_evals[idx])
                 rows.append(row)
             except Exception:
-                print("couldn't parse this row:")
+                print("Could not parse column {} ({}) in this row:".format(idx, columnHeaders[idx]))
                 print(row)
                 bad_rows += 1
                 continue

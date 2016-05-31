@@ -8,20 +8,19 @@ import modify_logs
 def main():
     '''Main function'''
 
-    # if len(sys.argv) != 2:
-    #     print("Received %d arguments - Expected 1" % (len(sys.argv) - 1))
-    #     raise SystemExit
-    #
-    # file_name = sys.argv[1]
-
-    if len(sys.argv) > 2:
+    if len(sys.argv) != 2:
         print("Received %d arguments - Expected 1" % (len(sys.argv) - 1))
         raise SystemExit
-    elif len(sys.argv) is 2:
-        file_name = sys.argv[1]
-    else:
-        # file_name = "globus_log.csv"
-        file_name = "small_test_globus_log.csv"
+
+    file_name = sys.argv[1]
+
+    # if len(sys.argv) > 2:
+    #     print("Received %d arguments - Expected 1" % (len(sys.argv) - 1))
+    #     raise SystemExit
+    # elif len(sys.argv) is 2:
+    #     file_name = sys.argv[1]
+    # else:
+    #     file_name = "globus_log.csv"
 
     print(file_name)
 
@@ -40,6 +39,8 @@ def main():
 
     # transfers_by_day = parse_logs.get_transfers_by_day(dict_transfers, True)
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
+    # max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
+    # transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
 
     num_days_to_graph = 10
     num_bins = 86400
@@ -47,24 +48,9 @@ def main():
     top_transfer_days = parse_logs.get_busiest_days(dict_transfers, num_days_to_graph, True)
 
     for date, transfers in top_transfer_days.items():
-        plot_original_data(transfers, date, num_bins)
+        # plot_original_data(transfers, date, num_bins)
 
         plot_modified_data(transfers, date, num_bins)
-
-
-        # bins = modify_logs.bin_data(None, num_bins, transfers, date)
-        #
-        # title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
-        # plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
-        # make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
-
-    # max_date, max_count = parse_logs.get_max_day(dict_transfers, True)
-    # transfers = parse_logs.get_transfers_on_day(dict_transfers, max_date)
-    # make_plot.make_bar_graph(plot_filename,title, num_bins, transfers, yaxis="linear")
-
-    # num_bins = 24
-    # title = "Network Usage on {}".format(max_date)
-    # plot_filename = "plots/orig_network_demand_{}_{}bins.png".format(max_date, num_bins)
 
 
 def plot_original_data(transfers, date, num_bins):
@@ -72,15 +58,24 @@ def plot_original_data(transfers, date, num_bins):
 
     title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
     plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
-    make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
+    make_plot.make_line_plot(plot_filename, title, bins)
 
 
 def plot_modified_data(transfers, date, num_bins):
-    bins = modify_logs.split_logs_and_modify_transfers(num_bins, transfers, date, 0.1, 0.6, 0.5)
+    min_price = 0.05
+    max_price = 0.6
+    non_flexible_jobs_percent = 0.5
+    bins, x_bins, new_bins = modify_logs.split_logs_and_modify_transfers(num_bins, transfers, date, min_price,
+                                                                         max_price, non_flexible_jobs_percent)
 
     title = "Network Usage on {} - {} Transfers".format(date, len(transfers))
     plot_filename = "plots/mod_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(transfers), num_bins)
-    make_plot.make_line_plot(plot_filename, title, bins, yaxis="linear")
+    make_plot.make_line_plot(plot_filename, title, bins, new_bins=new_bins)
+    # make_plot.make_line_plot(plot_filename, title, bins, new_bins=new_bins, x_bins=x_bins)
+
+    with open('output_logs/{}-transfers_{}.csv'.format(len(transfers), date), 'w') as the_file:
+        for idx, cur_bin in enumerate(new_bins):
+            the_file.write('{}, {}, {}, {}\n'.format(idx, cur_bin.start_t, cur_bin.end_t, cur_bin.bytes))
 
 
 if __name__ == "__main__":

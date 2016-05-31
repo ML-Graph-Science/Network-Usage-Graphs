@@ -1,7 +1,8 @@
-
+import copy
 import random
-import collections
 import datetime
+from operator import itemgetter
+import numpy
 
 
 class Bin(object):
@@ -29,7 +30,7 @@ def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_ra
 
     x_transfers, y_transfers = split_logs(transfers, x_percent, 1-x_percent)
 
-    new_bins = bin_data(None, num_bins, x_transfers, date)
+    x_bins = bin_data(None, num_bins, x_transfers, date)
 
     min_bin_idx, min_bin = get_min_bin(bins)
     max_bin_idx, max_bin = get_max_bin(bins)
@@ -37,37 +38,56 @@ def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_ra
     min_value = (max_bin.bytes - min_bin.bytes) * min_range + min_bin.bytes
     max_value = (max_bin.bytes - min_bin.bytes) * max_range + min_bin.bytes
 
-    # print(len(bins))
-    # print('min: {}'.format(min_bin_idx))
-    # print(min_bin)
-    # print(min_value)
-    #
-    # print('max: {}'.format(max_bin_idx))
-    # print(max_bin)
-    # print(max_value)
-    # print('')
+    # uniform distribution max_prices
+    # for transfer in y_transfers:
+    #     value = random.uniform(min_value, max_value)
+    #     transfer['max_price'] = value
 
+    # # exponential distribution max_prices
+    # for transfer in y_transfers:
+    #     value = min_value + (max_value - min_value) * 0.5 * random.expovariate(1)
+    #     transfer['max_price'] = value
+
+    bin_values = [cur_bin.bytes for cur_bin in bins]
+
+    mean_value = numpy.mean(bin_values)
+    std_deviation = numpy.std(bin_values)
+    median_value = numpy.median(bin_values)
+
+    print("\nmin bin value: {}, max bin value: {}".format(min_bin.bytes, max_bin.bytes))
+    print("min range value: {}, max range value: {}".format(min_value, max_value))
+    print("median bin value: {}, std deviation: {}".format(median_value, std_deviation))
+    print("average bin value: {}".format(mean_value))
+
+    # normal distribution max_prices
     for transfer in y_transfers:
-        value = random.uniform(min_value, max_value)
-        transfer['max_price'] = value
+        cur_value = random.gauss(mean_value, std_deviation)
+        while cur_value < min_value or max_value < cur_value:
+            cur_value = random.gauss(mean_value, std_deviation)
+        transfer['max_price'] = cur_value
 
-    new_bins = bin_data(new_bins, len(new_bins), y_transfers, date)
+    max_prices = [transfer['max_price'] for transfer in y_transfers]
+    print("\nMax Prices for Y Transfers")
+    print(max_prices)
 
-    return new_bins
+    new_bins = bin_data(x_bins, len(x_bins), y_transfers, date)
+
+    return bins, x_bins, new_bins
 
 
 # distribute the transfers into the appropriate amount of bins
-def bin_data(bins, num_bins, transfers, date):
+def bin_data(old_bins, num_bins, transfers, date):
     # turn date object into datetime with time set to all 0
     date_time = datetime.datetime(date.year, date.month, date.day)
 
-    if bins is None:
+    if old_bins is None:
         # make the bins
         bin_size, bins = make_bins(num_bins, date_time)
 
     else:
         # get the bin_size
-        bin_size = (bins[1].start_t - bins[0].start_t).total_seconds()
+        bin_size = (old_bins[1].start_t - old_bins[0].start_t).total_seconds()
+        bins = copy.deepcopy(old_bins)
 
     for transfer in transfers:
 
@@ -81,9 +101,14 @@ def bin_data(bins, num_bins, transfers, date):
 
         # if the transfer has been designated as non-critical, assigned a max price,
         # and the current start_time exceeds that price, then find the soonest start_time that fits that price
+
+        tmp_val = bins[start_bin_idx].bytes
+        if 'max_price' in transfer:
+            tmp_val2 = transfer['max_price']
+
         if 'max_price' in transfer and bins[start_bin_idx].bytes > transfer['max_price']:
 
-            while bins[start_bin_idx].bytes > transfer['max_price'] and start_bin_idx < num_bins:
+            while start_bin_idx < num_bins and bins[start_bin_idx].bytes > transfer['max_price']:
                 start_bin_idx += 1
 
             if start_bin_idx >= num_bins:
@@ -95,15 +120,15 @@ def bin_data(bins, num_bins, transfers, date):
             end_time = min(bins[-1].end_t, start_time + transfer['elapsed'])
 
             # check if the transfer is being trimmed
-            if end_time - start_time < transfer['elapsed']:
-                print('\nunable to finish transfer on day for price reasons \n{}'.format(transfer))
+            # if end_time - start_time < transfer['elapsed']:
+            #     print('\nunable to finish transfer on day for price reasons \n{}'.format(transfer))
 
             # calculate the new shifted end_bin_idx
             end_bin_idx = int((end_time - date_time).total_seconds() / bin_size)
 
         # Update the first intersection bin
         intersect_start = max(bins[start_bin_idx].start_t, start_time)
-        intersect_end = min(bins[start_bin_idx].end_t, end_time)
+        intersect_end = min(bins[start_bin_idx].end_t + datetime.timedelta(microseconds=1), end_time)
 
         intersect_time = (intersect_end - intersect_start).total_seconds()
         bins[start_bin_idx].bytes += round(intersect_time * transfer['rate'])
@@ -118,7 +143,7 @@ def bin_data(bins, num_bins, transfers, date):
 
             # Update the last intersection bin
             intersect_start = max(bins[end_bin_idx].start_t, start_time)
-            intersect_end = min(bins[end_bin_idx].end_t, end_time)
+            intersect_end = min(bins[end_bin_idx].end_t + datetime.timedelta(microseconds=1), end_time)
 
             intersect_time = (intersect_end - intersect_start).total_seconds()
             bins[end_bin_idx].bytes += round(intersect_time * transfer['rate'])
@@ -174,43 +199,17 @@ def split_logs(transfers, x_percent, y_percent):
         print('Error - x_percent({}) + y_percent({}) = {}, but should equal 1'.
               format(x_percent, y_percent, x_percent+y_percent))
 
-    # if transfers is None:
-    #     transfers = collections.OrderedDict()
-    #     for i in range(9):
-    #         transfers[i] = "val: {}".format(str(i))
-    #
-    # print(transfers)
-
-    # if transfers is None:
-    #     transfers = []
-    #     for i in range(9):
-    #         transfers.append(i)
-    # print(transfers)
-
-    # keys = list(transfers.keys())
-    # random.shuffle(keys)
-
-    # shuffled_list = [(key, transfers[key]) for key in keys]
-
     shuffled_list = list(transfers)
     random.shuffle(shuffled_list)
 
     x_count = round(len(shuffled_list) * x_percent)
-    # y_count = len(shuffled_list) - x_count
 
     x_list = shuffled_list[:x_count]
     y_list = shuffled_list[x_count:]
 
-    # print(x_list)
-    # print(y_list)
-
-    # x_dict = collections.OrderedDict(x_list)
-    # y_dict = collections.OrderedDict(y_list)
-
-    # print(x_dict)
-    # print(y_dict)
-
-    # return x_dict, y_dict
+    # need to sort the lists by transfer request time
+    x_list = sorted(x_list, key=itemgetter('request_time'))
+    y_list = sorted(y_list, key=itemgetter('request_time'))
 
     return x_list, y_list
 
