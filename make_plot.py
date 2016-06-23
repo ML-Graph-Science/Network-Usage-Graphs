@@ -4,21 +4,16 @@ import matplotlib.pyplot as plt
 import os
 
 
-def make_line_plot(filename, title, bins, new_bins=None, x_bins=None):
+def make_line_plot(filename, title, ylabel, bins, new_bins=None, x_bins=None):
 
     fig, ax = plt.subplots()
 
     plt.xlabel('Time of Day')
-    plt.ylabel('Network Demand (MiB/S)')
+    plt.ylabel(ylabel)
     plt.title(title)
-
-    bytes_in_megabyte = 1024*1024
 
     x = [cur_bin.start_t for cur_bin in bins]
     y = [cur_bin.bytes for cur_bin in bins]
-
-    # convert bytes to megabytes
-    y = [float(val)/bytes_in_megabyte for val in y]
 
     plt.plot(x, y, color='cornflowerblue', linestyle='-', linewidth=0.5, label='Transfers')
 
@@ -26,16 +21,12 @@ def make_line_plot(filename, title, bins, new_bins=None, x_bins=None):
         x = [cur_bin.start_t for cur_bin in new_bins]
         y = [cur_bin.bytes for cur_bin in new_bins]
 
-        # convert bytes to megabytes
-        y = [float(val) / bytes_in_megabyte for val in y]
         plt.plot(x, y, color='red', linestyle='-', linewidth=0.5, label='Modified Transfers')
 
     if x_bins is not None:
         x = [cur_bin.start_t for cur_bin in x_bins]
         y = [cur_bin.bytes for cur_bin in x_bins]
 
-        # convert bytes to megabytes
-        y = [float(val) / bytes_in_megabyte for val in y]
         plt.plot(x, y, color='green', linestyle='-', linewidth=0.5, label='X Transfers')
 
     if new_bins is not None and x_bins is not None:

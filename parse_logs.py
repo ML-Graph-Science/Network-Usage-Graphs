@@ -194,3 +194,16 @@ def get_transfers_on_day(rows, date):
     transfers_by_day = get_transfers_by_day(rows, False)
 
     return transfers_by_day[date]
+
+
+def print_transfers_on_day(rows, date_to_print):
+    transfers = get_transfers_on_day(rows, date_to_print)
+
+    # sort by transfer rate descending
+    from operator import itemgetter
+    transfers = sorted(transfers, key=itemgetter('rate'), reverse=True)
+
+    print("%s - %d transfers" % (date_to_print, len(transfers)))
+    for idx, transfer in enumerate(transfers):
+        print("%d: %s - %s; Rate: %d; Bytes: %d" % (idx, transfer['request_time'], transfer['complete_time'],
+                                                    transfer['rate'], transfer['bytes']))
