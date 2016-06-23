@@ -1,5 +1,5 @@
 import datetime
-import parse_logs
+import parse_globus_logs
 import copy
 import csv
 import collections
@@ -88,7 +88,7 @@ def make_triangle_log(output_file=None, num_entries=1000, percent_over_lap=0.5,
 
     csv_writer = csv.writer(csv_file)
 
-    csv_writer.writerow(parse_logs.columnHeaders)
+    csv_writer.writerow(parse_globus_logs.columnHeaders)
 
     for entry in log_entries:
         entry['elapsed'] = entry['elapsed'].total_seconds()

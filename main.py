@@ -1,20 +1,42 @@
 import sys
-from os.path import isfile
+from os.path import isfile, exists
+from os import makedirs
 
-import parse_logs
+import parse_globus_logs
+import parse_xfer_data_logs
 import make_plot
 import modify_logs
 import datetime
 import copy
 
+parser = None
+plots_folder = None
+
+
 def main():
     '''Main function'''
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
         print("Received %d arguments - Expected 1" % (len(sys.argv) - 1))
         raise SystemExit
 
     file_name = sys.argv[1]
+
+    global parser
+    global plots_folder
+
+    # if the user passes in the command line argument to use parse_xfer_data_logs then use that parser
+    if len(sys.argv) == 3 and sys.argv[2] == 'parse_xfer_data_logs':
+        parser = parse_xfer_data_logs
+        plots_folder = 'plots-xfer_data_logs'
+    # otherwise default to using parse_globus_logs as the parser for the program
+    else:
+        parser = parse_globus_logs
+        plots_folder = 'plots-globus_logs'
+
+    # verify that the plots output folder exists, if it doesn't, then create it
+    if not exists(plots_folder):
+        makedirs(plots_folder)
 
     # if len(sys.argv) > 2:
     #     print("Received %d arguments - Expected 1" % (len(sys.argv) - 1))
@@ -35,9 +57,9 @@ def main():
         print("Input string is not a valid file_name - %s" % (file_name))
         raise SystemExit
 
-    (header, transfers) = parse_logs.parse_csv(file_name, False)
+    (header, transfers) = parser.parse_csv(file_name, False)
 
-    dict_transfers = parse_logs.dictify_rows(transfers)
+    dict_transfers = parser.dictify_rows(transfers)
 
     # transfers_by_day = parse_logs.get_transfers_by_day(dict_transfers, True)
     # transfers_per_day = parse_logs.get_transfers_per_day(dict_transfers, True)
@@ -50,24 +72,34 @@ def main():
     # print out all of the transfers that occur on the provided day sorted in descending order by the transfer rate
     # parse_logs.print_transfers_on_day(dict_transfers, date_to_print=datetime.date(2015, 7, 2))
 
-    date_to_use = datetime.date(2015, 6, 3)
-    transfers = parse_logs.get_transfers_on_day(dict_transfers, date_to_use)
+    # date_to_use = datetime.date(2015, 6, 3)
+    # transfers = parser.get_transfers_on_day(dict_transfers, date_to_use)
+
+    date_to_use = datetime.date(2012, 3, 10)
+    transfers = parser.get_transfers_on_day(dict_transfers, date_to_use)
 
     # plot_original_data(transfers, date_to_use, 86400, network_bandwidth=True)
-    # plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False)
     # plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=True)
+    # plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False)
     # plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False)
 
+    plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False)
     plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.05)
     plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.1)
     plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.2)
     plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.3)
     plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.4)
 
+    plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.5)
+    plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.6)
+    plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.7)
+    plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.8)
+    plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, non_flexible_jobs_percent=0.9)
+
 
 def plot_busiest_days(dict_transfers, num_days_to_graph):
     num_bins = 86400
-    top_transfer_days = parse_logs.get_busiest_days(dict_transfers, num_days_to_graph, True)
+    top_transfer_days = parser.get_busiest_days(dict_transfers, num_days_to_graph, True)
 
     for date, transfers in top_transfer_days.items():
         # plot_original_data(transfers, date, num_bins)
@@ -91,12 +123,13 @@ def plot_original_data(transfers, date, num_bins, network_bandwidth):
             cur_bin.bytes = float(cur_bin.bytes) / bytes_in_megabyte
 
         title = "Network Usage on {} - {} Transfers".format(date, len(tmp_transfers))
-        plot_filename = "plots/orig_network_demand/{}_{}-transfers_{}-bins.png".format(date, len(tmp_transfers), num_bins)
+        plot_filename = "{}/orig_network_demand/{}_{}-transfers_original.png".format(plots_folder,
+                                                                                     date, len(tmp_transfers))
         ylabel = 'Network Demand (MiB/S)'
     else:
         title = "Concurrent Transfers on {} - {} Transfers".format(date, len(tmp_transfers))
-        plot_filename = "plots/orig_concurrent_transfers/{}_{}-transfers_{}-bins.png".format(date, len(tmp_transfers),
-                                                                                            num_bins)
+        plot_filename = "{}/orig_concurrent_transfers/{}_{}-transfers_original.png".format(plots_folder, date,
+                                                                                           len(tmp_transfers))
         ylabel = '# Concurrent Transfers'
 
     make_plot.make_line_plot(plot_filename, title, ylabel, bins)
@@ -124,14 +157,14 @@ def plot_modified_data(transfers, date, num_bins, network_bandwidth, non_flexibl
             cur_bin.bytes = float(cur_bin.bytes) / bytes_in_megabyte
 
         title = "Network Usage on {} - {} Transfers".format(date, len(tmp_transfers))
-        plot_filename = "plots/mod_network_demand/{}_{}-transfers_{}-hard_percent.png".format(date, len(tmp_transfers),
-                                                                                              non_flexible_jobs_percent)
+        plot_filename = "{}/mod_network_demand/{}_{}-transfers_{:.2f}-hard_percent.png".\
+            format(plots_folder, date, len(tmp_transfers), non_flexible_jobs_percent)
         ylabel = 'Network Demand (MiB/S)'
         log_file = 'output_logs/mod_network_demand/{}-transfers_{}.csv'.format(len(tmp_transfers), date)
     else:
         title = "Concurrent Transfers on {} - {} Transfers".format(date, len(tmp_transfers))
-        plot_filename = "plots/mod_concurrent_transfers/{}_{}-transfers_{}-hard_percent.png".\
-            format(date, len(tmp_transfers), non_flexible_jobs_percent)
+        plot_filename = "{}/mod_concurrent_transfers/{}_{}-transfers_{:.2f}-hard_percent.png".\
+            format(plots_folder, date, len(tmp_transfers), non_flexible_jobs_percent)
         ylabel = '# Concurrent Transfers'
         log_file = 'output_logs/mod_concurrent_transfers/{}-transfers_{}.csv'.format(len(tmp_transfers), date)
 

@@ -82,8 +82,8 @@ def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_ra
         transfer['max_price'] = cur_value
 
     max_prices = [transfer['max_price'] for transfer in y_transfers]
-    print("\nMax Prices for Y Transfers")
-    print(max_prices)
+    # print("\nMax Prices for Y Transfers")
+    # print(max_prices)
 
     # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
     if network_bandwidth is True:
