@@ -25,26 +25,10 @@ class Bin(object):
         return "(start_t: {}, end_t: {}, bytes: {})".format(self.start_t, self.end_t, self.bytes)
 
 
-def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_range, x_percent, network_bandwidth):
+def assign_max_prices(original_bins, transfers, min_range, max_range):
 
-    # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
-    if network_bandwidth is True:
-        bins = bin_data_using_transfer_rates(None, num_bins, transfers, date)
-    # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
-    else:
-        bins = bin_data_using_concurrent_transfers(None, num_bins, transfers, date)
-
-    x_transfers, y_transfers = split_logs(transfers, x_percent, 1-x_percent)
-
-    # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
-    if network_bandwidth is True:
-        x_bins = bin_data_using_transfer_rates(None, num_bins, x_transfers, date)
-    # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
-    else:
-        x_bins = bin_data_using_concurrent_transfers(None, num_bins, x_transfers, date)
-
-    min_bin_idx, min_bin = get_min_bin(bins)
-    max_bin_idx, max_bin = get_max_bin(bins)
+    min_bin_idx, min_bin = get_min_bin(original_bins)
+    max_bin_idx, max_bin = get_max_bin(original_bins)
 
     min_value = (max_bin.bytes - min_bin.bytes) * min_range + min_bin.bytes
     max_value = (max_bin.bytes - min_bin.bytes) * max_range + min_bin.bytes
@@ -59,7 +43,7 @@ def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_ra
     #     value = min_value + (max_value - min_value) * 0.5 * random.expovariate(1)
     #     transfer['max_price'] = value
 
-    bin_values = [cur_bin.bytes for cur_bin in bins]
+    bin_values = [cur_bin.bytes for cur_bin in original_bins]
     bin_values.sort()
 
     # remove the top 5% of values from the list
@@ -75,29 +59,106 @@ def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_ra
     print("average bin value: {}".format(mean_value))
 
     # normal distribution max_prices
-    for transfer in y_transfers:
+    for transfer in transfers:
         cur_value = random.gauss(mean_value, std_deviation)
         while cur_value < min_value or max_value < cur_value:
             cur_value = random.gauss(mean_value, std_deviation)
         transfer['max_price'] = cur_value
 
-    max_prices = [transfer['max_price'] for transfer in y_transfers]
+    # max_prices = [transfer['max_price'] for transfer in transfers]
     # print("\nMax Prices for Y Transfers")
     # print(max_prices)
 
-    # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
-    if network_bandwidth is True:
-        new_bins = bin_data_using_transfer_rates(x_bins, len(x_bins), y_transfers, date)
-    # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
-    else:
-        new_bins = bin_data_using_concurrent_transfers(x_bins, len(x_bins), y_transfers, date)
-
-    return bins, x_bins, new_bins
+#
+# def splits_logs_and_bin_data(num_bins, transfers, date, x_percent, network_bandwidth):
+#
+#     x_transfers, y_transfers = split_logs(transfers, x_percent, 1 - x_percent)
+#
+#     # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
+#     if network_bandwidth is True:
+#         x_bins = bin_data_using_transfer_rates(None, num_bins, x_transfers, date)
+#         new_bins = bin_data_using_transfer_rates(x_bins, len(x_bins), y_transfers, date)
+#     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
+#     else:
+#         x_bins = bin_data_using_concurrent_transfers(None, num_bins, x_transfers, date)
+#         new_bins = bin_data_using_concurrent_transfers(x_bins, len(x_bins), y_transfers, date)
+#
+#     return x_bins, new_bins
+#
+#
+# def split_logs_and_modify_transfers(num_bins, transfers, date, min_range, max_range, x_percent, network_bandwidth):
+#
+#     # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
+#     if network_bandwidth is True:
+#         bins = bin_data_using_transfer_rates(None, num_bins, transfers, date)
+#     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
+#     else:
+#         bins = bin_data_using_concurrent_transfers(None, num_bins, transfers, date)
+#
+#     x_transfers, y_transfers = split_logs(transfers, x_percent, 1-x_percent)
+#
+#     # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
+#     if network_bandwidth is True:
+#         x_bins = bin_data_using_transfer_rates(None, num_bins, x_transfers, date)
+#     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
+#     else:
+#         x_bins = bin_data_using_concurrent_transfers(None, num_bins, x_transfers, date)
+#
+#     min_bin_idx, min_bin = get_min_bin(bins)
+#     max_bin_idx, max_bin = get_max_bin(bins)
+#
+#     min_value = (max_bin.bytes - min_bin.bytes) * min_range + min_bin.bytes
+#     max_value = (max_bin.bytes - min_bin.bytes) * max_range + min_bin.bytes
+#
+#     # uniform distribution max_prices
+#     # for transfer in y_transfers:
+#     #     value = random.uniform(min_value, max_value)
+#     #     transfer['max_price'] = value
+#
+#     # # exponential distribution max_prices
+#     # for transfer in y_transfers:
+#     #     value = min_value + (max_value - min_value) * 0.5 * random.expovariate(1)
+#     #     transfer['max_price'] = value
+#
+#     bin_values = [cur_bin.bytes for cur_bin in bins]
+#     bin_values.sort()
+#
+#     # remove the top 5% of values from the list
+#     bin_values[:int(len(bin_values) * 0.95)]
+#
+#     mean_value = numpy.mean(bin_values)
+#     std_deviation = numpy.std(bin_values)
+#     median_value = numpy.median(bin_values)
+#
+#     print("\nmin bin value: {}, max bin value: {}".format(min_bin.bytes, max_bin.bytes))
+#     print("min range value: {}, max range value: {}".format(min_value, max_value))
+#     print("median bin value: {}, std deviation: {}".format(median_value, std_deviation))
+#     print("average bin value: {}".format(mean_value))
+#
+#     # normal distribution max_prices
+#     for transfer in y_transfers:
+#         cur_value = random.gauss(mean_value, std_deviation)
+#         while cur_value < min_value or max_value < cur_value:
+#             cur_value = random.gauss(mean_value, std_deviation)
+#         transfer['max_price'] = cur_value
+#
+#     max_prices = [transfer['max_price'] for transfer in y_transfers]
+#     # print("\nMax Prices for Y Transfers")
+#     # print(max_prices)
+#
+#     # if network_bandwidth is True then bin the data using the bin_data_using_transfer_rates function
+#     if network_bandwidth is True:
+#         new_bins = bin_data_using_transfer_rates(x_bins, len(x_bins), y_transfers, date)
+#     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
+#     else:
+#         new_bins = bin_data_using_concurrent_transfers(x_bins, len(x_bins), y_transfers, date)
+#
+#     return bins, x_bins, new_bins
 
 
 # distribute the transfers into the appropriate amount of bins
 # bin data using the transfer rates and so each bin has the sum of the data transferred during its interval
-def bin_data_using_transfer_rates(old_bins, num_bins, transfers, date):
+def bin_data_using_transfer_rates(old_bins, num_bins, transfers, date, max_prices=False):
     # turn date object into datetime with time set to all 0
     date_time = datetime.datetime(date.year, date.month, date.day)
 
@@ -127,7 +188,7 @@ def bin_data_using_transfer_rates(old_bins, num_bins, transfers, date):
         if 'max_price' in transfer:
             tmp_val2 = transfer['max_price']
 
-        if 'max_price' in transfer and bins[start_bin_idx].bytes > transfer['max_price']:
+        if max_prices is True and 'max_price' in transfer and bins[start_bin_idx].bytes > transfer['max_price']:
 
             while start_bin_idx < num_bins and bins[start_bin_idx].bytes > transfer['max_price']:
                 start_bin_idx += 1
@@ -175,7 +236,7 @@ def bin_data_using_transfer_rates(old_bins, num_bins, transfers, date):
 # distribute the transfers into the appropriate amount of bins
 # bin data ignoring the transfer rates
 # so each bin's value is simply the number of concurrent transfers during its interval
-def bin_data_using_concurrent_transfers(old_bins, num_bins, transfers, date):
+def bin_data_using_concurrent_transfers(old_bins, num_bins, transfers, date, max_prices=False):
     # turn date object into datetime with time set to all 0
     date_time = datetime.datetime(date.year, date.month, date.day)
 
@@ -205,7 +266,7 @@ def bin_data_using_concurrent_transfers(old_bins, num_bins, transfers, date):
         if 'max_price' in transfer:
             tmp_val2 = transfer['max_price']
 
-        if 'max_price' in transfer and bins[start_bin_idx].bytes > transfer['max_price']:
+        if max_prices is True and 'max_price' in transfer and bins[start_bin_idx].bytes > transfer['max_price']:
 
             while start_bin_idx < num_bins and bins[start_bin_idx].bytes > transfer['max_price']:
                 start_bin_idx += 1
@@ -273,26 +334,26 @@ def get_max_bin(bins):
 
     return max_bin_idx, max_bin
 
-
-def split_logs(transfers, x_percent, y_percent):
-    # x_percent + y_percent should = 1
-    if x_percent + y_percent != 1:
-        print('Error - x_percent({}) + y_percent({}) = {}, but should equal 1'.
-              format(x_percent, y_percent, x_percent+y_percent))
-
-    shuffled_list = list(transfers)
-    random.shuffle(shuffled_list)
-
-    x_count = round(len(shuffled_list) * x_percent)
-
-    x_list = shuffled_list[:x_count]
-    y_list = shuffled_list[x_count:]
-
-    # need to sort the lists by transfer request time
-    x_list = sorted(x_list, key=itemgetter('request_time'))
-    y_list = sorted(y_list, key=itemgetter('request_time'))
-
-    return x_list, y_list
+#
+# def split_logs(transfers, x_percent, y_percent):
+#     # x_percent + y_percent should = 1
+#     if x_percent + y_percent != 1:
+#         print('Error - x_percent({}) + y_percent({}) = {}, but should equal 1'.
+#               format(x_percent, y_percent, x_percent+y_percent))
+#
+#     shuffled_list = list(transfers)
+#     random.shuffle(shuffled_list)
+#
+#     x_count = round(len(shuffled_list) * x_percent)
+#
+#     x_list = shuffled_list[:x_count]
+#     y_list = shuffled_list[x_count:]
+#
+#     # need to sort the lists by transfer request time
+#     x_list = sorted(x_list, key=itemgetter('request_time'))
+#     y_list = sorted(y_list, key=itemgetter('request_time'))
+#
+#     return x_list, y_list
 
 
 
