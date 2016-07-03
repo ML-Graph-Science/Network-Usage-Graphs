@@ -67,7 +67,8 @@ def main():
     # date_to_use = datetime.date(2015, 6, 3)
     # transfers = parser.get_transfers_on_day(dict_transfers, date_to_use)
 
-    date_to_use = datetime.date(2012, 3, 10)
+    # date_to_use = datetime.date(2012, 3, 10)
+    date_to_use = datetime.date(2013, 5, 3)
     transfers = parser.get_transfers_on_day(dict_transfers, date_to_use)
 
     # plot_original_data(transfers, date_to_use, 86400, network_bandwidth=True)
@@ -77,8 +78,8 @@ def main():
 
     hard_constraint_job_percents = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     make_plot.plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False, plots_folder=plots_folder)
-    make_plot.plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, plots_folder=plots_folder,
-                                 non_flexible_jobs_percent=hard_constraint_job_percents)
+    # make_plot.plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, plots_folder=plots_folder,
+    #                              non_flexible_jobs_percent=hard_constraint_job_percents)
 
 
 if __name__ == "__main__":

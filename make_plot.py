@@ -2,6 +2,7 @@ import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
+import numpy
 
 import copy
 import random
@@ -28,6 +29,19 @@ def plot_original_data(transfers, date, num_bins, network_bandwidth, plots_folde
     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
     else:
         bins = modify_logs.bin_data_using_concurrent_transfers(None, num_bins, tmp_transfers, date)[-num_bins:]
+
+    # plot statistics about the original bins:
+    bin_values = [cur_bin.bytes for cur_bin in bins]
+    mean_value = numpy.mean(bin_values)
+    std_deviation = numpy.std(bin_values)
+    median_value = numpy.median(bin_values)
+
+    min_bin_idx, min_bin = modify_logs.get_min_bin(bins)
+    max_bin_idx, max_bin = modify_logs.get_max_bin(bins)
+
+    print("\nmin bin value: {}, max bin value: {}".format(min_bin.bytes, max_bin.bytes))
+    print("average bin value: {}, median bin value: {}".format(mean_value, median_value))
+    print("std deviation: {}".format(std_deviation))
 
     if network_bandwidth is True:
         bytes_in_megabyte = 1024 * 1024

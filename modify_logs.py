@@ -44,19 +44,19 @@ def assign_max_prices(original_bins, transfers, min_range, max_range):
     #     transfer['max_price'] = value
 
     bin_values = [cur_bin.bytes for cur_bin in original_bins]
-    bin_values.sort()
 
-    # remove the top 5% of values from the list
-    bin_values[:int(len(bin_values) * 0.95)]
+    # bin_values.sort()
+    # # remove the top 5% of values from the list
+    # bin_values[:intd(len(bin_values) * 0.95)]
 
     mean_value = numpy.mean(bin_values)
     std_deviation = numpy.std(bin_values)
     median_value = numpy.median(bin_values)
 
-    print("\nmin bin value: {}, max bin value: {}".format(min_bin.bytes, max_bin.bytes))
-    print("min range value: {}, max range value: {}".format(min_value, max_value))
-    print("median bin value: {}, std deviation: {}".format(median_value, std_deviation))
-    print("average bin value: {}".format(mean_value))
+    # print("\nmin bin value: {}, max bin value: {}".format(min_bin.bytes, max_bin.bytes))
+    # print("min range value: {}, max range value: {}".format(min_value, max_value))
+    # print("median bin value: {}, std deviation: {}".format(median_value, std_deviation))
+    # print("average bin value: {}".format(mean_value))
 
     # normal distribution max_prices
     for transfer in transfers:
