@@ -27,7 +27,7 @@ def plot_original_data(transfers, date, num_bins, network_bandwidth, plots_folde
         bins = modify_logs.bin_data_using_transfer_rates(None, num_bins, tmp_transfers, date)
     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
     else:
-        bins = modify_logs.bin_data_using_concurrent_transfers(None, num_bins, tmp_transfers, date)
+        bins = modify_logs.bin_data_using_concurrent_transfers(None, num_bins, tmp_transfers, date)[-num_bins:]
 
     if network_bandwidth is True:
         bytes_in_megabyte = 1024 * 1024
@@ -49,11 +49,13 @@ def plot_original_data(transfers, date, num_bins, network_bandwidth, plots_folde
 
 
 def plot_modified_data(transfers, date, num_bins, network_bandwidth, plots_folder, non_flexible_jobs_percent=None):
-    min_price_range = 0.1
-    max_price_range = 0.8
-    if non_flexible_jobs_percent is None:
-        non_flexible_jobs_percent = [0.5]
-    elif non_flexible_jobs_percent is int:
+    # min_price_range = 0.1
+    # max_price_range = 0.8
+    min_price_range = 0.0
+    max_price_range = 1.0
+    # if non_flexible_jobs_percent is None:
+    #     non_flexible_jobs_percent = [0.5]
+    if non_flexible_jobs_percent is int:
         non_flexible_jobs_percent = [non_flexible_jobs_percent]
 
     tmp_transfers = copy.deepcopy(transfers)
@@ -63,7 +65,7 @@ def plot_modified_data(transfers, date, num_bins, network_bandwidth, plots_folde
         original_bins = modify_logs.bin_data_using_transfer_rates(None, num_bins, tmp_transfers, date)
     # else if it is False, then bin the data using the bin_data_using_concurrent_transfers function
     else:
-        original_bins = modify_logs.bin_data_using_concurrent_transfers(None, num_bins, tmp_transfers, date)
+        original_bins = modify_logs.bin_data_using_concurrent_transfers(None, num_bins, tmp_transfers, date)[-num_bins:]
 
     modify_logs.assign_max_prices(original_bins, tmp_transfers, min_price_range, max_price_range)
 
@@ -93,8 +95,8 @@ def plot_modified_data(transfers, date, num_bins, network_bandwidth, plots_folde
             new_bins = modify_logs.bin_data_using_concurrent_transfers(x_bins, len(x_bins), y_transfers,
                                                                        date, max_prices=True)
 
-        make_plot_with_modified_bins(original_bins, x_bins, new_bins, network_bandwidth, plots_folder,
-                                     len(tmp_transfers), date, hard_jobs_value)
+        make_plot_with_modified_bins(original_bins, x_bins[-num_bins:], new_bins[-num_bins:], network_bandwidth,
+                                     plots_folder, len(tmp_transfers), date, hard_jobs_value)
 
 
 def make_plot_with_modified_bins(original_bins, x_bins, new_bins, network_bandwidth,
@@ -113,7 +115,7 @@ def make_plot_with_modified_bins(original_bins, x_bins, new_bins, network_bandwi
         title = "Network Usage on {} - {} Transfers".format(date, len_transfers)
         plot_filename = "{}/mod_network_demand/{}_{}-transfers_{:.2f}-hard_percent.png".\
             format(plots_folder, date, len_transfers, non_flexible_jobs_percent)
-        log_file = "output_logs/mod_network_demand/{}_{}-transfers_{:.2f}-hard_percent.png". \
+        log_file = "output_logs/mod_network_demand/{}_{}-transfers_{:.2f}-hard_percent.csv". \
             format(date, len_transfers, non_flexible_jobs_percent)
         ylabel = 'Network Demand (MiB/S)'
     else:
@@ -121,7 +123,7 @@ def make_plot_with_modified_bins(original_bins, x_bins, new_bins, network_bandwi
         title = "Concurrent Transfers on {} - {} Transfers".format(date, len_transfers)
         plot_filename = "{}/mod_concurrent_transfers/{}_{}-transfers_{:.2f}-hard_percent.png".\
             format(plots_folder, date, len_transfers, non_flexible_jobs_percent)
-        log_file = "output_logs/mod_concurrent_transfers/{}_{}-transfers_{:.2f}-hard_percent.png". \
+        log_file = "output_logs/mod_concurrent_transfers/{}_{}-transfers_{:.2f}-hard_percent.csv". \
             format(date, len_transfers, non_flexible_jobs_percent)
         ylabel = '# Concurrent Transfers'
 

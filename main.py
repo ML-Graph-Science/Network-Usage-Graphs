@@ -75,12 +75,10 @@ def main():
     # plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False)
     # plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False)
 
-
     hard_constraint_job_percents = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     make_plot.plot_original_data(transfers, date_to_use, 86400, network_bandwidth=False, plots_folder=plots_folder)
     make_plot.plot_modified_data(transfers, date_to_use, 86400, network_bandwidth=False, plots_folder=plots_folder,
                                  non_flexible_jobs_percent=hard_constraint_job_percents)
-
 
 
 if __name__ == "__main__":
